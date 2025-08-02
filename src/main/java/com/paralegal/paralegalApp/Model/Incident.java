@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
+@Table(name = "incident")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table()
 public class Incident {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

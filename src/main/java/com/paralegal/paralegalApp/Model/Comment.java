@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "comment")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table()
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
