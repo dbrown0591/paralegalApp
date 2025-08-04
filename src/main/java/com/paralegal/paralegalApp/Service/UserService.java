@@ -5,8 +5,11 @@ import com.paralegal.paralegalApp.Model.User;
 import com.paralegal.paralegalApp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -18,9 +21,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id){
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    public Optional<User> getUserById(Long id){
+        return userRepository.findById(id);
     }
 
     public User createUser(User user){
@@ -35,7 +37,38 @@ public class UserService {
                     })
                     .orElseThrow(() -> new UserNotFoundException("User Not Found"));
     }
+    @SuppressWarnings("ConstantConditions")
+    public User partiallyUpdateUser(Long id, Map<String,Object> updates){
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("User not Found: " + id));
+        updates.forEach((key, value)-> {
+            if(key.equals("email") || key.equals("password")){
+                return; //Do not update these here
+            }
+            Field field = ReflectionUtils.findField(User.class, key);
+            if(field != null){
+                field.setAccessible(true);
+                ReflectionUtils.setField(field, existingUser, value);
+            }
+        });
+        return userRepository.save(existingUser);
+    }
 
+    public void updateEmail(Long id, String newEmail){
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("User Not Found with Id: " + id));
+        user.setEmail(newEmail);
+        userRepository.save(user);
+    }
+
+    public void updatePassword(Long id, String newPassword){
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("User Not Found with Id: " + id));
+        // TODO: Hash the Password before saving (Spring Security BCrypt or Similar)
+        // TODO: Validation should also be added- like email format, password strength, etc
+        user.setPassword(newPassword);
+        userRepository.save(user);
+    }
     public void deleteUser(Long id){
         userRepository.deleteById(id);
     }

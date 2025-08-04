@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@RestController
+@RequestMapping("/api/incidents")
+@CrossOrigin("*")
 public class IncidentController {
 
     private final IncidentService incidentService;
@@ -28,13 +30,13 @@ public class IncidentController {
         return new ResponseEntity<>(incidents, HttpStatus.OK);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Incident> getIncidentById(@PathVariable Long id){
         return incidentService.getIncidentById(id)
                 .map(incident -> new ResponseEntity<>(incident, HttpStatus.OK))
                 .orElseThrow(()->new IncidentNotFoundException("Incident Not Found with Id: " + id));
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<Incident> updateIncident(@PathVariable Long id, @RequestBody Incident updateIncident){
         Incident incident = incidentService.updateIncident(id,updateIncident);

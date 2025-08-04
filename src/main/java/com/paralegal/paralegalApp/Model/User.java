@@ -24,5 +24,6 @@ public class User {
 
     private String email;
 
-    private String password;  //to be encrypted
+    private String password;  //to be encrypted. Also if the user needs to change password they need to be
+                              //directed to change password
 }
