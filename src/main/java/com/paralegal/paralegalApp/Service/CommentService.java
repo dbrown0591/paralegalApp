@@ -4,8 +4,13 @@ import com.paralegal.paralegalApp.Exceptions.CommentNotFoundException;
 import com.paralegal.paralegalApp.Model.Comment;
 import com.paralegal.paralegalApp.Repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class CommentService {
@@ -31,6 +36,18 @@ public class CommentService {
                    comment.setID(id);
                    return commentRepository.save(comment);
                }).orElseThrow(()->new CommentNotFoundException("Comment Not Found"));
+    }
+
+    // Create partial
+    public Comment partiallyUpdateComment(@PathVariable Long id, @RequestBody Map<String, Object> update){
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(()-> new CommentNotFoundException("Comment Not Found by id: " + id));
+
+        update.forEach((key, value)-> {
+            Field field = ReflectionUtils.findField(Comment.class,key);
+            ReflectionUtils.setField(field, comment, value);
+        });
+        return commentRepository.save(comment);
     }
 
     public void deleteComment(Long id){

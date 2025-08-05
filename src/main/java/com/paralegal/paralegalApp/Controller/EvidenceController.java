@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 public class EvidenceController {
 
@@ -37,7 +38,11 @@ public class EvidenceController {
         return new ResponseEntity<>(updateEvidence, HttpStatus.OK);
     }
 
-    // Create partial
+    @PatchMapping("/{id}")
+    public ResponseEntity<Evidence> partiallyUpdateEvidence(@PathVariable Long id, @RequestBody Map<String, Object> update){
+        Evidence evidence = evidenceService.partiallyUpdateEvidence(id, update);
+        return ResponseEntity.ok(evidence);
+    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvidence(@PathVariable Long id){
