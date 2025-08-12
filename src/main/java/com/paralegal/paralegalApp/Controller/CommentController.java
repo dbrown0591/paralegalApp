@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@RestController
+@RequestMapping("/api/comments")
+@CrossOrigin("*")
 public class CommentController {
 
     private final CommentService commentService;
@@ -33,13 +35,13 @@ public class CommentController {
                 .map(comment -> new ResponseEntity<>(comment, HttpStatus.OK))
                 .orElseThrow(() -> new CommentNotFoundException("Comment Not Found by id: " + id));
     }
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment updateComment){
         Comment comment =  commentService.updateComment(id, updateComment);
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
-    @PatchMapping("{/id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Comment> partiallyUpdateComment(@PathVariable Long id, @RequestBody Map<String, Object> update){
         Comment comment = commentService.partiallyUpdateComment(id, update);
         return new ResponseEntity<>(comment, HttpStatus.OK);

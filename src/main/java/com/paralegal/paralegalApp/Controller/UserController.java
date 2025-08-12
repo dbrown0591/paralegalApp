@@ -3,13 +3,16 @@ package com.paralegal.paralegalApp.Controller;
 import com.paralegal.paralegalApp.Exceptions.UserNotFoundException;
 import com.paralegal.paralegalApp.Model.User;
 import com.paralegal.paralegalApp.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
+//@Validated  -- Circle back
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin("*")
@@ -21,7 +24,7 @@ public class UserController {
         this.userService = userService;
     }
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
         User savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
@@ -37,7 +40,7 @@ public class UserController {
                 .orElseThrow(()-> new UserNotFoundException("User Not Found: " + id));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User user){
         User  updateUser = userService.updateUser(id,user);
         return new ResponseEntity<>(updateUser, HttpStatus.OK);
     }

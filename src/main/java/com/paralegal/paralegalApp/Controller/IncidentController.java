@@ -1,14 +1,20 @@
 package com.paralegal.paralegalApp.Controller;
 
+import com.paralegal.paralegalApp.DTO.IncidentDTO;
 import com.paralegal.paralegalApp.Exceptions.IncidentNotFoundException;
+import com.paralegal.paralegalApp.Mapper.IncidentMapper;
 import com.paralegal.paralegalApp.Model.Incident;
 import com.paralegal.paralegalApp.Service.IncidentService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
+//@Validated -- circle back
 @RestController
 @RequestMapping("/api/incidents")
 @CrossOrigin("*")
@@ -20,38 +26,42 @@ public class IncidentController {
         this.incidentService = incidentService;
     }
     @PostMapping
-    public ResponseEntity<Incident> createIncident(@RequestBody Incident incident){
-        Incident savedIncident = incidentService.createIncident(incident);
-        return new ResponseEntity<>(savedIncident, HttpStatus.CREATED);
+    public ResponseEntity<IncidentDTO> create(@Valid @RequestBody Incident in) {
+        var saved = incidentService.createIncident(in);
+        var dto = IncidentMapper.toDTO(saved);
+        URI location = URI.create("/api/incidents/" + saved.getId());
+        return ResponseEntity.created(location).body(dto); // 201 + Location header
     }
+
     @GetMapping
-    public ResponseEntity<List<Incident>> getAllIncidents(){
-       List<Incident> incidents =  incidentService.getAllIncidents();
-        return new ResponseEntity<>(incidents, HttpStatus.OK);
+    public List<IncidentDTO> getAllIncidents(){
+       return incidentService.getAllIncidents()
+               .stream().map(IncidentMapper::toDTO).toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Incident> getIncidentById(@PathVariable Long id){
-        return incidentService.getIncidentById(id)
-                .map(incident -> new ResponseEntity<>(incident, HttpStatus.OK))
-                .orElseThrow(()->new IncidentNotFoundException("Incident Not Found with Id: " + id));
+    public IncidentDTO getIncidentById(@PathVariable Long id){
+      Incident incident = incidentService.getIncidentById(id)
+              .orElseThrow(()-> new IncidentNotFoundException("Incident Not Found with Id: " + id));
+      return IncidentMapper.toDTO(incident);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Incident> updateIncident(@PathVariable Long id, @RequestBody Incident updateIncident){
+    public IncidentDTO updateIncident(@PathVariable Long id, @Valid @RequestBody Incident updateIncident){
         Incident incident = incidentService.updateIncident(id,updateIncident);
-        return new ResponseEntity<>(incident, HttpStatus.OK);
+        return IncidentMapper.toDTO(incident);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Incident> partiallyUpdateIncident(@PathVariable Long id,
+    public IncidentDTO partiallyUpdateIncident(@PathVariable("id") Long incidentId,
                                                             @RequestBody Map<String,Object> updates){
-        Incident updateIncident = incidentService.partiallyUpdateIncident(id, updates);
-        return ResponseEntity.ok(updateIncident);
+        var updated = incidentService.partiallyUpdateIncident(incidentId, updates);
+        return IncidentMapper.toDTO(updated);
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteIncident(@PathVariable Long id){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIncident(@PathVariable Long id){
         incidentService.deleteIncident(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
     }
 }

@@ -1,6 +1,9 @@
 package com.paralegal.paralegalApp.Service;
 
+import com.paralegal.paralegalApp.Enum.IncidentStatus;
+import com.paralegal.paralegalApp.Enum.SeverityLevel;
 import com.paralegal.paralegalApp.Exceptions.IncidentNotFoundException;
+import com.paralegal.paralegalApp.Mapper.IncidentMapper;
 import com.paralegal.paralegalApp.Model.Incident;
 import com.paralegal.paralegalApp.Repository.IncidentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,28 +32,56 @@ public class IncidentService {
         return incidentRepository.save(incident);
     }
 
-    public Incident updateIncident(Long id, Incident updateIncident){
+    // inside IncidentService
+    public Incident updateIncident(Long id, Incident incoming) {
+        Incident existing = incidentRepository.findById(id)
+                .orElseThrow(() -> new IncidentNotFoundException("Incident Not Found with Id: " + id));
+        IncidentMapper.updateEntity(existing, incoming);
+        return incidentRepository.save(existing);
+    }
 
-            return incidentRepository.findById(id).map(existingIncident -> {
-
-                updateIncident.setID(id);
-                return incidentRepository.save(updateIncident);
-            }).orElseThrow(()-> new IncidentNotFoundException("Incident Not Found with Id: " + id));
-        }
     @SuppressWarnings("ConstantConditions")
-    public Incident partiallyUpdateIncident(Long id, Map<String,Object> updates){
+    public Incident partiallyUpdateIncident(Long id, Map<String, Object> updates) {
         Incident incident = incidentRepository.findById(id)
-                .orElseThrow(()-> new IncidentNotFoundException("Incident Not Found with Id: " + id));
+                .orElseThrow(() -> new IncidentNotFoundException("Incident Not Found with Id: " + id));
 
-        updates.forEach((key, value)->{
-            Field field = ReflectionUtils.findField(Incident.class, key);
-            if(field != null){
-                field.setAccessible(true);
-                ReflectionUtils.setField(field,incident,value);
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "status" -> {
+                    try {
+                        var v = IncidentStatus.valueOf(value.toString());
+                        incident.setStatus(v);
+                    } catch (IllegalArgumentException e) {
+                        throw new org.springframework.web.server.ResponseStatusException(
+                                org.springframework.http.HttpStatus.BAD_REQUEST, "Invalid status value");
+                    }
+                }
+                case "severityLevel" -> {
+                    try {
+                        var v = SeverityLevel.valueOf(value.toString());
+                        incident.setSeverityLevel(v);
+                    } catch (IllegalArgumentException e) {
+                        throw new org.springframework.web.server.ResponseStatusException(
+                                org.springframework.http.HttpStatus.BAD_REQUEST, "Invalid severityLevel value");
+                    }
+                }
+                case "createdAt" -> {
+                    // optional: allow updating createdAt if you want
+                    incident.setCreatedAt(java.time.LocalDateTime.parse(value.toString()));
+                }
+                default -> {
+                    var field = org.springframework.util.ReflectionUtils.findField(Incident.class, key);
+                    if (field != null) {
+                        field.setAccessible(true);
+                        org.springframework.util.ReflectionUtils.setField(field, incident, value);
+                    }
+                }
             }
         });
+
         return incidentRepository.save(incident);
     }
+
 
     public void deleteIncident(Long id){
          incidentRepository.deleteById(id);

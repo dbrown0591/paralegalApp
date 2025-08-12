@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long id;
 
     private String content;
 
@@ -26,4 +26,5 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "incident_id")
     private Incident incident;
+
 }

@@ -4,6 +4,7 @@ import com.paralegal.paralegalApp.Exceptions.CommentNotFoundException;
 import com.paralegal.paralegalApp.Model.Comment;
 import com.paralegal.paralegalApp.Repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,11 +13,14 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+@Service
 public class CommentService {
-    @Autowired
-    private CommentRepository commentRepository; // TODO: Convert to constructor injection once finalized if not using multiple constuctors
 
+    private final CommentRepository commentRepository; // TODO: Convert to constructor injection once finalized if not using multiple constuctors
+
+    public CommentService(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
 
     public List<Comment> getAllComments(){
         return commentRepository.findAll();
@@ -33,7 +37,7 @@ public class CommentService {
     public Comment updateComment(Long id, Comment comment){
        return commentRepository.findById(id)
                .map(existingComment -> {
-                   comment.setID(id);
+                   comment.setId(id);
                    return commentRepository.save(comment);
                }).orElseThrow(()->new CommentNotFoundException("Comment Not Found"));
     }

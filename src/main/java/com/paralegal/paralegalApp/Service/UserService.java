@@ -32,7 +32,7 @@ public class UserService {
     public User updateUser(Long id, User updateUser){
             return userRepository.findById(id)
                     .map(existingUser -> {
-                        updateUser.setID(id);
+                        updateUser.setId(id);
                         return userRepository.save(updateUser);
                     })
                     .orElseThrow(() -> new UserNotFoundException("User Not Found"));

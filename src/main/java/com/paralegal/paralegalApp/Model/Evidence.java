@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Evidence {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ID;
+    private Long Id;
 
     private String fileName;
 
@@ -24,7 +24,9 @@ public class Evidence {
     @Lob
     private byte[] data;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "incident_id")
     private Incident incident;
+
+
 }
