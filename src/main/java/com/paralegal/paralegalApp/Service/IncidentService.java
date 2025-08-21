@@ -67,7 +67,7 @@ public class IncidentService {
                 }
                 case "createdAt" -> {
                     // optional: allow updating createdAt if you want
-                    incident.setCreatedAt(java.time.LocalDateTime.parse(value.toString()));
+                    //incident.setCreatedAt(java.time.LocalDateTime.parse(value.toString()));
                 }
                 default -> {
                     var field = org.springframework.util.ReflectionUtils.findField(Incident.class, key);

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-//@EnableJpaRepositories(basePackages = "com.paralegal.paralegalApp.Repository")
-//@EntityScan(basePackages = "com.paralegal.paralegalApp.Model")
+@EnableJpaRepositories(basePackages = "com.paralegal.paralegalApp.Repository")
+@EntityScan(basePackages = "com.paralegal.paralegalApp.Model")
 //@ComponentScan(basePackages = "com.paralegal.paralegalApp")
 public class ParalegalAppApplication {
 

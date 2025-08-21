@@ -1,5 +1,6 @@
 package com.paralegal.paralegalApp.Model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,17 +20,21 @@ import lombok.NoArgsConstructor;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Column(name = "user_name")
     private String userName;
     @NotBlank(message = "Email is required")
     @Email(message = "Must be a valid email")
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
+    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY) // accept in requests, never return
+    @Column(name = "password_hash", nullable = false)
     private String password;  //to be encrypted. Also, if the user needs to change password they need to be
                               //directed to change password
 

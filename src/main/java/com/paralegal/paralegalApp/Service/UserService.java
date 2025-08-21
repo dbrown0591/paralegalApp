@@ -3,7 +3,9 @@ package com.paralegal.paralegalApp.Service;
 import com.paralegal.paralegalApp.Exceptions.UserNotFoundException;
 import com.paralegal.paralegalApp.Model.User;
 import com.paralegal.paralegalApp.Repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -13,9 +15,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    @Autowired
-    private UserRepository userRepository; // TODO: Convert to constructor injection once finalized if not using multiple constuctors
+
+    private final UserRepository userRepository; // TODO: Convert to constructor injection once finalized if not using multiple constuctors
+
+    private final PasswordEncoder passwordEncoder;
 
     public List<User> getAllUsers(){
         return userRepository.findAll();
@@ -26,6 +31,7 @@ public class UserService {
     }
 
     public User createUser(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 

@@ -1,11 +1,13 @@
 package com.paralegal.paralegalApp.Controller;
 
+import com.paralegal.paralegalApp.DTO.CreateCommentRequest;
 import com.paralegal.paralegalApp.Exceptions.CommentNotFoundException;
 import com.paralegal.paralegalApp.Model.Comment;
 import com.paralegal.paralegalApp.Service.CommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ public class CommentController {
         List<Comment> comments = commentService.getAllComments();
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Comment> getCommentById(@PathVariable Long id){
         return commentService.getCommentById(id)

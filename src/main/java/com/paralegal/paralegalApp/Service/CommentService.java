@@ -2,25 +2,30 @@ package com.paralegal.paralegalApp.Service;
 
 import com.paralegal.paralegalApp.Exceptions.CommentNotFoundException;
 import com.paralegal.paralegalApp.Model.Comment;
+import com.paralegal.paralegalApp.Model.Incident;
 import com.paralegal.paralegalApp.Repository.CommentRepository;
+import com.paralegal.paralegalApp.Repository.IncidentRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class CommentService {
 
     private final CommentRepository commentRepository; // TODO: Convert to constructor injection once finalized if not using multiple constuctors
-
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
+    private final IncidentRepository incidentRepo;
 
     public List<Comment> getAllComments(){
         return commentRepository.findAll();
@@ -30,8 +35,24 @@ public class CommentService {
         return commentRepository.findById(id);
     }
 
+    public List<Comment> getCommentsByIncidentID(Long incidentId){
+        return commentRepository.findByIncidentIdOrderByIdAsc(incidentId);
+    }
+
     public Comment createComment(Comment comment){
         return commentRepository.save(comment);
+    }
+
+    public Comment createCommentForIncident(Long incidentId, String text){
+        Incident incident = incidentRepo.findById(incidentId)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Incident " + incidentId + " not found"));
+
+        Comment c = new Comment();
+        c.setContent(text);
+        c.setIncident(incident);
+        return commentRepository.save(c);
+
+
     }
 
     public Comment updateComment(Long id, Comment comment){
