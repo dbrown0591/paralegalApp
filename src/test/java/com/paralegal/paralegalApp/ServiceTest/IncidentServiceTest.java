@@ -14,12 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import static com.paralegal.paralegalApp.Enum.IncidentStatus.OPEN;
+import static com.paralegal.paralegalApp.Enum.SeverityLevel.LOW;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+
 
 
 import java.time.LocalDateTime;
@@ -43,7 +48,7 @@ public class IncidentServiceTest {
                 .reportedBy("Damion")
                 .incidentType("THREAT")
                 .severityLevel(SeverityLevel.MEDIUM)
-                .status(IncidentStatus.OPEN)
+                .status(OPEN)
                 .location("San Antonio, TX")
                 .description("Initial")
                 .createdAt(LocalDateTime.now())
@@ -79,7 +84,7 @@ public class IncidentServiceTest {
                .reportedBy("Damion")
                .incidentType("THEFT")
                .severityLevel(SeverityLevel.MEDIUM)
-               .status(IncidentStatus.OPEN)
+               .status(OPEN)
                .location("Jersey City, NJ")
                .description("New")
                .build();
@@ -95,7 +100,7 @@ public class IncidentServiceTest {
         Incident incoming = Incident.builder()
                 .reportedBy("D. Brown")
                 .incidentType("THREAT")
-                .severityLevel(SeverityLevel.LOW)
+                .severityLevel(LOW)
                 .status(IncidentStatus.CLOSED)
                 .description("NJ")
                 .build();
@@ -128,7 +133,7 @@ public class IncidentServiceTest {
         updates.put("description", "Patched desc");
         updates.put("location", "Austin, TX");
 
-        var patched = incidentService.partiallyUpdateIncident(1l, updates);
+        var patched = incidentService.partiallyUpdateIncident(1L, updates);
 
         assertThat(patched.getDescription()).isEqualTo("Patched desc");
         assertThat(patched.getLocation()).isEqualTo("Austin, TX");
@@ -173,6 +178,19 @@ public class IncidentServiceTest {
 
         assertThat(patched.getCreatedAt())
                 .isEqualTo(LocalDateTime.parse("2025-08-11T10:15:30")); // unchanged
+    }
+    @Test
+    void partiallyUpdatedIncident_invalidSeverity_throwsBadRequest(){
+        var incident = Incident.builder().id(1L).status(OPEN).severityLevel(LOW).build();
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incident));
+
+        Map<String,Object> updates = Map.of("severityLevel", "NOT_A_LEVEL");
+
+        var ex = assertThrows(ResponseStatusException.class,
+                () -> incidentService.partiallyUpdateIncident(1L, updates));
+
+        assertEquals("should be 400 BAD_REQUEST",HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        verify(incidentRepository, never()).save(any());
     }
 
     @Test

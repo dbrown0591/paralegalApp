@@ -64,13 +64,21 @@ public class CommentService {
     }
 
     // Create partial
-    public Comment partiallyUpdateComment(@PathVariable Long id, @RequestBody Map<String, Object> update){
+    @SuppressWarnings("ConstantConditions")
+    public Comment partiallyUpdateComment(Long id, Map<String, Object> update){
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(()-> new CommentNotFoundException("Comment Not Found by id: " + id));
 
         update.forEach((key, value)-> {
             Field field = ReflectionUtils.findField(Comment.class,key);
+            if(field == null){
+                throw new IllegalArgumentException("Unknown field: " + key);
+            }
+            field.setAccessible(true);
+
+            if("id".equals(key) || "createdAt".equals(key)) return;
             ReflectionUtils.setField(field, comment, value);
+
         });
         return commentRepository.save(comment);
     }

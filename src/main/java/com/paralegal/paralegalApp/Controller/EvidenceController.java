@@ -3,6 +3,7 @@ package com.paralegal.paralegalApp.Controller;
 import com.paralegal.paralegalApp.Exceptions.EvidenceNotFoundException;
 import com.paralegal.paralegalApp.Model.Evidence;
 import com.paralegal.paralegalApp.Service.EvidenceService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class EvidenceController {
         this.evidenceService = evidenceService;
     }
     @PostMapping
-    public ResponseEntity<Evidence> createEvidence(Evidence evidence){
+    public ResponseEntity<Evidence> createEvidence(@Valid @RequestBody Evidence evidence){
         Evidence savedEvidence = evidenceService.createEvidence(evidence);
         return new ResponseEntity<>(savedEvidence, HttpStatus.CREATED);
     }

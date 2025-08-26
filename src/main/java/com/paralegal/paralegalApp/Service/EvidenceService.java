@@ -41,7 +41,7 @@ public class EvidenceService {
                     }).orElseThrow(()-> new EvidenceNotFoundException("Evidence Not Found"));
     }
     @SuppressWarnings("ConstantConditions")
-    public Evidence partiallyUpdateEvidence(@PathVariable Long id, Map<String, Object> updates){
+    public Evidence partiallyUpdateEvidence(Long id, Map<String, Object> updates){
         Evidence evidence = evidenceRepository.findById(id)
                 .orElseThrow(()-> new EvidenceNotFoundException("Evidence not Found by id: " + id));
 
