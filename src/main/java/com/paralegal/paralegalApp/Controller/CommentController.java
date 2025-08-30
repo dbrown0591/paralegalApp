@@ -22,7 +22,7 @@ public class CommentController {
         this.commentService = commentService;
     }
     @PostMapping
-    public ResponseEntity<Comment> createComment(Comment comment){
+    public ResponseEntity<Comment> createComment(@RequestBody Comment comment){
         Comment savedComment = commentService.createComment(comment);
         return new ResponseEntity<>(savedComment, HttpStatus.CREATED);
     }

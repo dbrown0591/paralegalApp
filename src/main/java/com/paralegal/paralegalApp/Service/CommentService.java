@@ -51,8 +51,6 @@ public class CommentService {
         c.setContent(text);
         c.setIncident(incident);
         return commentRepository.save(c);
-
-
     }
 
     public Comment updateComment(Long id, Comment comment){
