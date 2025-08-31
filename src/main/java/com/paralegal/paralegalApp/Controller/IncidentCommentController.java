@@ -3,6 +3,7 @@ package com.paralegal.paralegalApp.Controller;
 import com.paralegal.paralegalApp.DTO.CreateCommentRequest;
 import com.paralegal.paralegalApp.Model.Comment;
 import com.paralegal.paralegalApp.Service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class IncidentCommentController {
 
     @PostMapping
     public ResponseEntity<Comment> add(@PathVariable Long incidentId,
-                                       @RequestBody CreateCommentRequest body) {
+                                       @Valid @RequestBody CreateCommentRequest body) {
         Comment saved = commentService.createCommentForIncident(incidentId, body.content());
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(saved.getId()).toUri();
