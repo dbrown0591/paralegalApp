@@ -1,13 +1,13 @@
 package com.paralegal.paralegalApp.Controller;
 
-import com.paralegal.paralegalApp.DTO.CreateCommentRequest;
+import com.paralegal.paralegalApp.DTO.CommentDTO;
+import com.paralegal.paralegalApp.Mapper.CommentMapper;
 import com.paralegal.paralegalApp.Exceptions.CommentNotFoundException;
 import com.paralegal.paralegalApp.Model.Comment;
 import com.paralegal.paralegalApp.Service.CommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -32,12 +32,12 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Comment> getCommentById(@PathVariable Long id){
-        return commentService.getCommentById(id)
-                .map(comment -> new ResponseEntity<>(comment, HttpStatus.OK))
-                .orElseThrow(() -> new CommentNotFoundException("Comment Not Found by id: " + id));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Comment> getCommentById(@PathVariable Long id){
+//        return commentService.getCommentById(id)
+//                .map(comment -> new ResponseEntity<>(comment, HttpStatus.OK))
+//                .orElseThrow(() -> new CommentNotFoundException("Comment Not Found by id: " + id));
+//    }
     @PutMapping("/{id}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment updateComment){
         Comment comment =  commentService.updateComment(id, updateComment);
@@ -56,4 +56,12 @@ public class CommentController {
         commentService.deleteComment(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CommentDTO> get(@PathVariable Long id) {
+        var comment = commentService.getCommentById(id)
+                .orElseThrow(() -> new CommentNotFoundException("Comment Not Found by id: " + id));
+        return ResponseEntity.ok(CommentMapper.toDTO(comment));
+    }
+
 }

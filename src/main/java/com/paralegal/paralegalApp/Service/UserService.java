@@ -38,17 +38,25 @@ public class UserService {
     public User updateUser(Long id, User updateUser){
             return userRepository.findById(id)
                     .map(existingUser -> {
+                        String preservedEmail = existingUser.getEmail();
+                        String preservedPasswordHash = existingUser.getPassword();
+
                         updateUser.setId(id);
+
+                        updateUser.setEmail(preservedEmail);
+                        updateUser.setPassword(preservedPasswordHash);
                         return userRepository.save(updateUser);
                     })
                     .orElseThrow(() -> new UserNotFoundException("User Not Found"));
     }
+
+
     @SuppressWarnings("ConstantConditions")
     public User partiallyUpdateUser(Long id, Map<String,Object> updates){
         User existingUser = userRepository.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("User not Found: " + id));
         updates.forEach((key, value)-> {
-            if(key.equals("email") || key.equals("password")){
+            if(key.equals("id") || key.equals("email") || key.equals("password")){
                 return; //Do not update these here
             }
             Field field = ReflectionUtils.findField(User.class, key);
@@ -72,7 +80,7 @@ public class UserService {
                 .orElseThrow(()-> new UserNotFoundException("User Not Found with Id: " + id));
         // TODO: Hash the Password before saving (Spring Security BCrypt or Similar)
         // TODO: Validation should also be added- like email format, password strength, etc
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
     public void deleteUser(Long id){

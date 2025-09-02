@@ -226,13 +226,33 @@ public class UserServiceTest {
     }
     @Test
     void updatePassword_found_setsPasswordAndSaves(){
+        var existing = User.builder()
+                .id(1L)
+                .userName("devon")
+                .email("devon@example.com")
+                .password(null)
+                .build();
+
+        // Arrange
         when(userRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(passwordEncoder.encode("password")).thenReturn("ENCODED");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+        // Optional: if you want to assert matches() too:
+        when(passwordEncoder.matches("password", "ENCODED")).thenReturn(true);
 
-        userService.updatePassword(1L,"password");
+        // Act
+        userService.updatePassword(1L, "password");
 
+        // Assert
         verify(userRepository).save(userCaptor.capture());
-        assertThat(userCaptor.getValue().getPassword()).isEqualTo("password");
+        var saved = userCaptor.getValue();
+
+        assertThat(saved.getPassword()).isEqualTo("ENCODED");       // encoded value saved
+        verify(passwordEncoder).encode("password");                  // encoder used
+        // Optional: only if you stubbed matches() above
+        assertThat(passwordEncoder.matches("password", saved.getPassword())).isTrue();
+
+        verify(userRepository).findById(1L);
     }
     @Test
     void updatePassword_notFound_throws(){
