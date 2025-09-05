@@ -80,16 +80,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository users) {
-        return email -> users.findByEmail(email)
-                .map(u -> org.springframework.security.core.userdetails.User
-                        .withUsername(u.getEmail())
-                        .password(u.getPassword())
-                        .roles(u.getRole().name().replace("ROLE_", "")) // if your Role enum stores ROLE_*
-                        .build())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    }
 
     @Bean
     public AuthenticationProvider authProvider(UserDetailsService uds, PasswordEncoder encoder) {

@@ -4,8 +4,7 @@ import com.paralegal.paralegalApp.Model.User;
 import com.paralegal.paralegalApp.Repository.UserRepository;
 import com.paralegal.paralegalApp.Service.DbUserDetailsService;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -66,4 +65,22 @@ public class DbUserDetailsServiceTest {
 
         verify(userRepository).findByEmail("missing@example.com");
     }
+
+    @Test
+    void mapsRolesToAuthorities_withDefault() {
+        var domainUser = User.builder()
+                .id(1L).email("t@example.com").password("{noop}p").roles(java.util.Set.of()) // empty
+                .build();
+
+        var repo = Mockito.mock(UserRepository.class);
+       Mockito.when(repo.findByEmail("t@example.com"))
+                .thenReturn(Optional.of(domainUser));
+
+        var uds = new DbUserDetailsService(repo);
+        var u = uds.loadUserByUsername("t@example.com");
+
+        var auths = u.getAuthorities().stream().map(a -> a.getAuthority()).toList();
+        assertThat(auths).containsExactly("ROLE_USER");
+    }
+
 }

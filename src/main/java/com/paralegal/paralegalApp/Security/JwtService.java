@@ -1,12 +1,12 @@
 package com.paralegal.paralegalApp.Security;
 
 import io.jsonwebtoken.*;
+
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
@@ -17,13 +17,13 @@ public class JwtService {
 
     private final long expirationMs;
 
-    public JwtService(@Value("${jwt.secret}") String base64Secret,
-                      @Value("${jwt.expiration-ms}") long expirationMs){
-
-        byte[] secretBytes = java.util.Base64.getDecoder().decode(base64Secret);
-        this.key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(secretBytes);
+    public JwtService(@Value("${jwt.secret}") String secret,
+                      @Value("${jwt.expiration-ms}") long expirationMs) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
+
+
 
     public String generateToken(String subject, Map<String, Object> claims){
         long now = System.currentTimeMillis();
